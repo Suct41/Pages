@@ -1,0 +1,45 @@
+name: Publish site
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the site
+      run: |
+        mkdir _site
+        echo '<!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Video Page</title>
+          <style>
+            body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+            iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+          </style>
+        </head>
+        <body>
+          <iframe src="https://www.youtube.com/embed/9EcN33gTQY0?autoplay=1&mute=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </body>
+        </html>' > _site/index.html
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
